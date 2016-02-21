@@ -3,24 +3,33 @@ var api = express.Router();
 var request = require('request');
 
  //get the result from google places rest api
-api.post('/join', function(request, response){
+api.post('/join', function(req, res){
+	console.log("joining");
+
+	//-33.8670522,151.1957362
+
   //request.query.var_name to get the parameter.
   //suppose to get:room_num, user_name, lon, lat
   //response: room_num, room_name, array of check points, obj of user joined (name, id, lon, lat)
-  request.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json?key=AIzaSyA9oGIO45zHzrEwc-XuTZAT2-ltcPpDyk0&radius=500&location=-33.8670522,151.1957362', function (error, response, body) {
+  var lon = req.body.lon;
+	var lat = req.body.lat;
+	//console.log(lon);
+	//console.log(lat);
+  var rest_api = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?key=AIzaSyA9oGIO45zHzrEwc-XuTZAT2-ltcPpDyk0&radius=500&location='+lat+','+lon;
+
+  request.get(rest_api, function (error, response, body) {
       if (!error && response.statusCode == 200) {
           //console.log(body); // Show the HTML for the Modulus homepage.
           console.log("got google response");
           var google_rest_result;
           google_rest_result = JSON.parse(body);
-          var room_num = request.body.room_num;
+          var room_num = req.body.room_num;
 		  //generate room_name
-		  var room_name = "room"+request.body.room_num;
+		  var room_name = "room"+req.body.room_num;
 		  //generate the array of check points
 		  //get the longitute and latitude
-		  var lon = request.body.lon;
-		  var lat = request.body.lat;
-
+		  var lon = req.body.lon;
+		  var lat = req.body.lat;
 
 		  //build the array for nearby 5 locations
 		  var locations = [];
@@ -38,7 +47,7 @@ api.post('/join', function(request, response){
 		    'room_name' : room_name,
 		    'loc' : locations
 		  }
-		  response.json(back);
+		  res.json(back);
 		}
 	});
 
