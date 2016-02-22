@@ -1,6 +1,6 @@
 // grab the things we need
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:27017/users');
+
 var Schema = mongoose.Schema;
 
 // create a schema

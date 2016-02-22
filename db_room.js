@@ -1,12 +1,12 @@
 // grab the things we need
 var mongoose = require('mongoose');
 
-var Schema = mongoose.Schema;
+var Schema2 = mongoose.Schema;
 
 // create a schema
 
 
-var roomSchema = new Schema({
+var roomSchema = new Schema2({
   room_num: Number,
   locations :[{lat: Number, lon: Number}]
 });

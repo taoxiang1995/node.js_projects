@@ -2,11 +2,6 @@ var express = require('express');
 var api = express.Router();
 var request = require('request');
 
-
-
-
-
-
 // if our user.js file is at app/models/user.js
 var User = require('../db_user');
 var Room = require('../db_room');
@@ -14,38 +9,25 @@ var Room = require('../db_room');
 var mongoose = require('mongoose');
 
 
+mongoose.connect('mongodb://localhost:27017/users');
 
 
-
-
-
-
-
- //get the result from google places rest api
+/*
+*  input: http://localhost3000/join room_num lon lat user_name
+	back: a json package, contains room_num, user_name, five check points locations
+	*/
 api.post('/join', function(req, res){
-	console.log("joining");
-
-	//-33.8670522,151.1957362
-
-  //request.query.var_name to get the parameter.
-  //suppose to get:room_num, user_name, lon, lat
-  //response: room_num, room_name, array of check points, obj of user joined (name, id, lon, lat)
-  var lon = req.body.lon;
-  var lat = req.body.lat;
   
-	//console.log(lon);
-	//console.log(lat);
-  var rest_api = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?key=AIzaSyA9oGIO45zHzrEwc-XuTZAT2-ltcPpDyk0&radius=500&location='+lat+','+lon;
+  var rest_api = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?key=AIzaSyA9oGIO45zHzrEwc-XuTZAT2-ltcPpDyk0&radius=500&location='+req.body.lat+','+req.body.lon;
 
   request.get(rest_api, function (error, response, body) {
       if (!error && response.statusCode == 200) {
           //console.log(body); // Show the HTML for the Modulus homepage.
-          console.log("got google response");
-          var google_rest_result;
-          google_rest_result = JSON.parse(body);
+          //console.log("got google response");
+         
+          var google_rest_result = JSON.parse(body);
           var room_num = req.body.room_num;
-		  //generate room_name
-		  var room_name = "room"+req.body.room_num;
+		  
 		  //generate the array of check points
 		  //get the longitute and latitude
 		  var lon = req.body.lon;
@@ -66,7 +48,7 @@ api.post('/join', function(req, res){
 			*  save user info to the database.
 
 			*/
-					// create a new user called chris
+		  // create a new user called chris
 				var chris = new User({
 				  
 				  user_name: req.body.user_name,
@@ -79,33 +61,50 @@ api.post('/join', function(req, res){
 				// call the built-in save method to save to the database
 				chris.save(function(err) {
 				  if (err) throw err;
-
-				  console.log('User saved successfully!');
 				});
 
-				var room = new Room({
+				var room_obj = new Room({
 					room_num: req.body.room_num,
 					locations: location
 				});
+				
+				var list_of_locations;
+				//get the 5 locations from the database.
 
+				Room.findOne({ room_num:  req.body.room_num}, 'locations', function(err, locs) {
+				  if (err) throw err;
+				  //console.log(locs.locations);
+				  list_of_locations = locs.locations;
+				  //console.log(list_of_locations);
 
-				Room.count({room_num: req.body.room_num}, function (err, count){ 
-				    if(count==0){
-				        room.save(function(err){
-					if (err) throw err;
-
-					console.log('Room saved successfukky!');
+				  // object of the user
+				  if (locs == null)
+				  {
+				  	room_obj.save(function(err){
+				 	if (err) throw err;
+				 	//list_of_locations = locs.locations;
+				 	//console.log('Room saved successfukky!');
+				 	});
+				  }
+				  				  //console.log(list_of_locations);
 					});
-				    }
-				}); 
 
-				//form the json
-		  var back = {
-		    'room_num' : room_num,
-		    'room_name' : room_name,
-		    'loc' : location
-		  }
-		  res.json(back);
+
+				    var locationss = Room.findOne({room_num: req.body.room_num});
+					locationss.select('locations');
+
+				    locationss.exec(function (err, person) {
+						if (err) return handleError(err);
+						list_of_locations =  person.locations;
+						var back = {
+							'room_num' : room_num,
+							'user_name' : req.body.user_name,
+							//'loc' : location,
+							'5_loc': list_of_locations
+							}
+							res.json(back);
+
+							})
 		}
 	});
 
@@ -113,7 +112,11 @@ api.post('/join', function(req, res){
 });
 
 
-api.get('/update', function(request, response){
+/*
+*	
+*/
+
+api.post('/update', function(request, response){
   //form the json
   var back = {
     'room_num' : room_num,
