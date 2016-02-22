@@ -7,9 +7,36 @@ var User = require('../db_user');
 var Room = require('../db_room');
   
 var mongoose = require('mongoose');
+var mongo_uri = process.env.MONGOLAB_URI;
+var uriUtil = require('mongodb-uri');
+var mongo = require('mongodb');
 
 
-mongoose.connect('mongodb://localhost:27017/users');
+var mongooseUri = uriUtil.formatMongoose(mongo_uri); 
+mongoose.connect(mongooseUri);
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function(){
+  console.log("connected to mongo");
+  Email.find({},function(err, emails){
+      if(err){
+        console.log("error" + err);
+      }else{
+        console.log("emails " +emails);
+      }
+    });
+  Order.find({},function(err, emails){
+      if(err){
+        console.log("error" + err);
+      }else{
+        console.log("orders: " +emails);
+      }
+    });
+});
+
+
+
+// mongoose.connect('mongodb://localhost:27017/users');
 
 
 /*
