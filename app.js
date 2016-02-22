@@ -24,6 +24,8 @@ app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
 app.use('/', api);
 
+var port = Number(process.env.PORT || 3000 );
+
 app.listen(3000, function(){
   console.log('Listening on port 3000');
 });
