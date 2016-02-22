@@ -10,28 +10,26 @@ var mongoose = require('mongoose');
 var mongo_uri = process.env.MONGOLAB_URI;
 var uriUtil = require('mongodb-uri');
 var mongo = require('mongodb');
-
-
 var mongooseUri = uriUtil.formatMongoose(mongo_uri); 
 mongoose.connect(mongooseUri);
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function(){
-  console.log("connected to mongo");
-  Email.find({},function(err, emails){
-      if(err){
-        console.log("error" + err);
-      }else{
-        console.log("emails " +emails);
-      }
-    });
-  Order.find({},function(err, emails){
-      if(err){
-        console.log("error" + err);
-      }else{
-        console.log("orders: " +emails);
-      }
-    });
+  // console.log("connected to mongo");
+  // Email.find({},function(err, emails){
+  //     if(err){
+  //       console.log("error" + err);
+  //     }else{
+  //       console.log("emails " +emails);
+  //     }
+  //   });
+  // Order.find({},function(err, emails){
+  //     if(err){
+  //       console.log("error" + err);
+  //     }else{
+  //       console.log("orders: " +emails);
+  //     }
+  //   });
 });
 
 
