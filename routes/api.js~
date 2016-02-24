@@ -61,7 +61,7 @@ api.post('/join', function(req, res){
 		  //build the array for nearby 5 locations
 		  var location = [];
 
-		  for (var i = 0; i<5 && google_rest_result.results.length; i++)
+		  for (var i = 0; i<5 && i<  google_rest_result.results.length; i++)
 		  {
 		    var latitude = google_rest_result.results[i].geometry.location.lat;
 		    var longitude =google_rest_result.results[i].geometry.location.lng;
