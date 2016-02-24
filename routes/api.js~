@@ -99,7 +99,10 @@ api.post('/join', function(req, res){
 				Room.findOne({ room_num:  req.body.room_num}, 'locations', function(err, locs) {
 				  if (err) throw err;
 				  //console.log(locs.locations);
-				  list_of_locations = locs.locations;
+				  if (locs != null)
+				      {
+					  list_of_locations = locs.locations;
+				      }
 				  //console.log(list_of_locations);
 
 				  // object of the user
