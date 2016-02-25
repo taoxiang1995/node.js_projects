@@ -49,7 +49,7 @@ api.post('/join', function(req, res){
     	room = roomResult;
 	});
 	
-	console.log(room);
+	console.log('caller:'+room);
 	res.json(room);  
 	// 		// save user info to the database.
 	// 		// create a new user called chris
@@ -158,6 +158,7 @@ function getRoom(req, cb) {
 			var lon = req.body.lon;
 			var lat = req.body.lat;
 			var rest_api = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?key=AIzaSyA9oGIO45zHzrEwc-XuTZAT2-ltcPpDyk0&radius=500&location='+lat+','+lon;
+			var location = [];
 
   			request.get(rest_api, function (error, response, body) {
 		      	if (!error && response.statusCode == 200) {
@@ -165,7 +166,7 @@ function getRoom(req, cb) {
 			        //console.log("got google response");
 					var google_rest_result = JSON.parse(body);
 					//build the array for nearby 5 locations
-					var location = [];
+
 					for (var i = 0; i < 5 && i < google_rest_result.results.length; i++) {
 						var latitude = google_rest_result.results[i].geometry.location.lat;
 						var longitude =google_rest_result.results[i].geometry.location.lng;
@@ -186,7 +187,7 @@ function getRoom(req, cb) {
 				//console.log('Room saved successfully!');
 			});
 			cb(room);
-			console.log(room);
+			console.log('callee:'+room);
 		}
 		//console.log(list_of_locations);
 	});
