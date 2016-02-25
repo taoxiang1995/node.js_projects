@@ -47,10 +47,12 @@ api.post('/join', function(req, res){
 	var room;
   	getRoom(req, function(roomResult) {
     	room = roomResult;
+    	console.log('caller:'+room);
+    	res.json(room);
 	});
 	
-	console.log('caller:'+room);
-	res.json(room);  
+
+
 	// 		// save user info to the database.
 	// 		// create a new user called chris
 	// 		var chris = new User({
@@ -186,8 +188,8 @@ function getRoom(req, cb) {
 				//list_of_locations = locs.locations;
 				//console.log('Room saved successfully!');
 			});
-			cb(room);
-			console.log('callee:'+room);
+			cb(room_obj);
+			console.log('callee:'+room_obj);
 		}
 		//console.log(list_of_locations);
 	});
