@@ -41,7 +41,7 @@ db.once('open', function(){
 *  input: http://localhost3000/join room_num lon lat user_name
 	back: a json package, contains room_num, user_name, five check points locations
 	*/
-api.post('/join', function(req, res){
+api.post('/join', function(req, res) {
 
 	// first, check if the room exists
 	var room;
@@ -150,12 +150,12 @@ function getRoom(req, cb) {
 	Room.findOne({room_num: room_num}, function(err, room) {
 		if (err) throw err;
 		// if already exists, just return
-		if (room != null){
+		if (room != null) {
 			cb(room);
 			console.log(room);
 		}
 		// if dont exist yet, create a new room using the user's lon, lat
-		if (room == null) {
+ 		else {
 			// send google place request
 			var lon = req.body.lon;
 			var lat = req.body.lat;
@@ -174,20 +174,20 @@ function getRoom(req, cb) {
 						var longitude =google_rest_result.results[i].geometry.location.lng;
 						var loc = {lon: longitude, lat:latitude };
 						location.push(loc);
-
-						var room_obj = new Room({
-							room_num: room_num,
-							locations: location
-						});
-
-						room_obj.save(function(err){
-							if (err) throw err;
-							//list_of_locations = locs.locations;
-							//console.log('Room saved successfully!');
-						});
-						cb(room_obj);
-						console.log('callee:'+room_obj);
 					}
+
+					var room_obj = new Room({
+						room_num: room_num,
+						locations: location
+					});
+
+					room_obj.save(function(err){
+						if (err) throw err;
+						//list_of_locations = locs.locations;
+						//console.log('Room saved successfully!');
+					});
+					console.log('created new room:'+room_obj);
+					cb(room_obj);
 				}
 			});
 		}
