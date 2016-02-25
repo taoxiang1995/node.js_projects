@@ -150,6 +150,7 @@ function getRoom(req, cb) {
 		// if already exists, just return
 		if (room != null){
 			cb(room);
+			console.log(room);
 		}
 		// if dont exist yet, create a new room using the user's lon, lat
 		if (room == null) {
@@ -185,6 +186,7 @@ function getRoom(req, cb) {
 				//console.log('Room saved successfully!');
 			});
 			cb(room);
+			console.log(room);
 		}
 		//console.log(list_of_locations);
 	});
