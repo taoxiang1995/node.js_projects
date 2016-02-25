@@ -176,7 +176,7 @@ api.post('/update', function(request, response){
 
 		}
 		response.json(back);
-	    })
+	    });
 
 	    //form the json
 	    
