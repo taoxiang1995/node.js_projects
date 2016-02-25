@@ -151,9 +151,9 @@ api.post('/update', function(request, response){
 	var lon = request.body.lon;
 
 	//update the current locations:
-	User.findOne({ name: user_name }, function (err, doc)
-		     {
-			 doc.cur_location.lon = lon;
+	User.findOne({ user_name: user_name }, function (err, doc)
+     		     {
+	       		 doc.cur_location.lon = lon;
 			 doc.cur_location.lat = lat;
 			 //doc.visits.$inc();
 			 doc.save();
