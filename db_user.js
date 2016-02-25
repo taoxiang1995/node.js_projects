@@ -5,10 +5,12 @@ var Schema = mongoose.Schema;
 
 // create a schema
 var userSchema = new Schema({
-  id: Number,
-  user_name: String,
-  cur_location: {lon: Number, lat: Number},
-  room_num: Number
+	id: Number,
+  	user_name: String,
+	lon: Number,
+	lat: Number,
+	progress: Number,
+	check_time: Number
 });
 
 

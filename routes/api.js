@@ -163,7 +163,7 @@ api.post('/update', function(request, response){
 });
 
 function getRoom(req, cb) {
-	// get from DB, create a new one if not exist yet
+	// get room from DB, create a new one if not exist yet
 	var room_num = req.body.room_num;
 	Room.findOne({room_num: room_num}, function(err, room) {
 		if (err) throw err;
