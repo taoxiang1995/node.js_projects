@@ -42,7 +42,6 @@ db.once('open', function(){
 	back: a json package, contains room_num, user_name, five check points locations
 	*/
 api.post('/join', function(req, res) {
-
 	// first, check if the room exists
   	getRoom(req, function(roomResult) {
     	var user_name = req.body.user_name;
@@ -67,101 +66,45 @@ api.post('/join', function(req, res) {
 		}
     	res.json(roomResult);
 	});
-	
-
-
-
-	// 		// save user info to the database.
-	// 		// create a new user called chris
-	// 		var chris = new User({
-	// 		  user_name: req.body.user_name,
-	// 		  cur_location: {lon: req.body.lon, lat: req.body.lat},
-	// 		  room_num: req.body.room_num
-	// 		});
-
-	// 		// call the built-in save method to save to the database
-	// 		chris.save(function(err) {
-	// 		  if (err) throw err;
-	// 		});
-
-
-				
-	// 		var list_of_locations;
-
-	// 		//get the 5 locations from the database.
-	// 		Room.findOne({ room_num:  req.body.room_num}, 'locations', function(err, locs) {
-	// 			if (err) throw err;
-	// 			//console.log(locs.locations);
-	// 			if (locs != null){
-	// 				list_of_locations = locs.locations;
-	// 			}
-	// 			// console.log(list_of_locations);
-	// 			// object of the user
-	// 			if (locs == null) {
-	// 				room_obj.save(function(err){
-	// 					if (err) throw err;
-	// 					//list_of_locations = locs.locations;
-	// 					//console.log('Room saved successfully!');
-	// 				});
-	// 			}
-	// 			//console.log(list_of_locations);
-	// 		});
-
-	// 	    var locationss = Room.findOne({room_num: req.body.room_num});
-	// 		locationss.select('locations');
-
-	// 	    locationss.exec(function (err, person) {
-	// 			if (err) return handleError(err);
-	// 			list_of_locations =  person.locations;
-	// 			var back = {
-	// 				'room_num' : room_num,
-	// 				'user_name' : req.body.user_name,
-	// 				//'loc' : location,
-	// 				'5_loc': list_of_locations
-	// 			}
-	// 			res.json(back);
-	// 		})
-	// 	}
-	// });
-
-
 });
 
-
-/*
-*	
-*/
-
 api.post('/update', function(request, response){
-	//get the params from the urls
+	// get the params from the urls
 	var user_name = request.body.user_name;
 	var lat = request.body.lat;
 	var lon = request.body.lon;
+	var progress = request.body.progress;
 
-	//update the current locations:
-	User.findOne({ user_name: user_name }, function (err, doc){
-		doc.cur_location.lon = lon;
-		doc.cur_location.lat = lat;
-		//doc.visits.$inc();
-		doc.save();
-	});
-
-	//get information of the user array
-	User.find({ },  function (err, users) {
-		if (err) return handleError(err);
-		var user_array = [];
-		for (var i = 0; i<users.length; i++)
-		    {
-			user_array.push(users[i]);
-		    }
-		
-		var back = {
-		    'users' : user_array
+	Room.findOne({room_num: room_num}, function(err, room) {
+		if (err) throw err;
+		// if no such room, just return a friendly message
+		if (room == null) {
+			response.end("No room number " + room_num + ", stupid. Or create a new room! :)");
+			return;
 		}
-		response.json(back);
-    });
+		// find the position of our dear user
+		var index = room.users.map(function(d) { return d['user_name']; }).indexOf(user_name);
+		if (index == -1) {
+			response.end("No such user " + user_name + " in room number " + room_num + ", stupid. Or join the room first! :)");
+			return;
+		}
+		// check_time needs refresh when user makes progress
+		if (progress > room.users[index].progress) {
+			var d = new Date();
+   			var n = d.getTime();
+			room.users[index].check_time = n;
+		}
+
+		// update and save!
+		room.users[index].lat = lat;
+		room.users[index].lon = lon;
+		room.users[index].progress = progress;
+		room.save(function(err) {if (err) throw err;});
+	}
 });
 
+
+// Helper function to get a room according to room number
 function getRoom(req, cb) {
 	// get room from DB, create a new one if not exist yet
 	var room_num = req.body.room_num;
