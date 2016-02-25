@@ -174,24 +174,23 @@ function getRoom(req, cb) {
 						var longitude =google_rest_result.results[i].geometry.location.lng;
 						var loc = {lon: longitude, lat:latitude };
 						location.push(loc);
+
+						var room_obj = new Room({
+							room_num: room_num,
+							locations: location
+						});
+
+						room_obj.save(function(err){
+							if (err) throw err;
+							//list_of_locations = locs.locations;
+							//console.log('Room saved successfully!');
+						});
+						cb(room_obj);
+						console.log('callee:'+room_obj);
 					}
 				}
 			});
-
-			var room_obj = new Room({
-				room_num: room_num,
-				locations: location
-			});
-
-			room_obj.save(function(err){
-				if (err) throw err;
-				//list_of_locations = locs.locations;
-				//console.log('Room saved successfully!');
-			});
-			cb(room_obj);
-			console.log('callee:'+room_obj);
 		}
-		//console.log(list_of_locations);
 	});
 }
 
