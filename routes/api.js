@@ -44,13 +44,31 @@ db.once('open', function(){
 api.post('/join', function(req, res) {
 
 	// first, check if the room exists
-	var room;
   	getRoom(req, function(roomResult) {
-    	room = roomResult;
-    	console.log('caller:'+room);
-    	res.json(room);
+    	var user_name = req.body.user_name;
+    	var found = false;
+    	// check if the user already joined
+		for (var i = 0; i < roomResult.users.length; i++) {
+			if (roomResult.users[i].user_name == user_name) {
+				found = true;
+			}
+		}
+		// if the user haven't joined yet, add the user into room and save room
+		if (!found){
+			var chris = new User({
+				user_name: req.body.user_name,
+				lat: req.body.lat,
+				lon: req.body.lon,
+				progress: -1,
+				check_time: -1
+			});
+			roomResult.users.push(chris);
+			roomResult.save(function(err) {if (err) throw err;});
+		}
+    	res.json(roomResult);
 	});
 	
+
 
 
 	// 		// save user info to the database.
@@ -168,13 +186,18 @@ function getRoom(req, cb) {
 			        //console.log("got google response");
 					var google_rest_result = JSON.parse(body);
 					//build the array for nearby 5 locations
+					console.log('       ' + google_rest_result);
 
-					for (var i = 0; i < 5 && i < google_rest_result.results.length; i++) {
+					// make the cycle!
+					var start_point = {lon: lon, lat: lat};
+					location.push(start_point);
+					for (var i = 0; i < 3 && i < google_rest_result.results.length; i++) {
 						var latitude = google_rest_result.results[i].geometry.location.lat;
 						var longitude =google_rest_result.results[i].geometry.location.lng;
-						var loc = {lon: longitude, lat:latitude };
+						var loc = {lon: longitude, lat:latitude};
 						location.push(loc);
 					}
+					location.push(start_point);
 
 					var room_obj = new Room({
 						room_num: room_num,
@@ -183,8 +206,6 @@ function getRoom(req, cb) {
 
 					room_obj.save(function(err){
 						if (err) throw err;
-						//list_of_locations = locs.locations;
-						//console.log('Room saved successfully!');
 					});
 					console.log('created new room:'+room_obj);
 					cb(room_obj);

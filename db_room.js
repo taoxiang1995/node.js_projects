@@ -7,9 +7,15 @@ var Schema2 = mongoose.Schema;
 
 
 var roomSchema = new Schema2({
-  room_num: Number,
-  locations: [{lat: Number, lon: Number}],
-  users: [{Number}]
+	room_num: Number,
+	locations: [{lat: Number, lon: Number}],
+	users: [{
+		user_name: String,
+		lat: Number,
+		lon: Number,
+		progress: Number,
+		check_time: Number
+	}]
 });
 
 // the schema is useless so far
