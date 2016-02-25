@@ -162,21 +162,23 @@ api.post('/update', function(request, response){
 
 
 	//get information of the user array
-	var user_array = [];
+	
 	User.findOne({ }, 'id user_name cur_location room_num', function (err, users) {
 		if (err) return handleError(err);
+		var user_array = [];
 		for (var i = 0; i<users.length; i++)
 		    {
 			user_array.push(users[i]);
 		    }
 		
+		var back = {
+		    'users' : user_array
+
+		}
+		response.json(back);
 	    })
 
 	    //form the json
-	    var back = {
-	    'users' : user_array
-    
-	}
-	response.json(back);
+	    
     });
 module.exports = api;
