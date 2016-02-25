@@ -70,6 +70,7 @@ api.post('/join', function(req, res) {
 
 api.post('/update', function(request, response){
 	// get the params from the urls
+	var room_num = req.body.room_num;
 	var user_name = request.body.user_name;
 	var lat = request.body.lat;
 	var lon = request.body.lon;
