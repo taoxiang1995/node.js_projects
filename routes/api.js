@@ -101,6 +101,7 @@ api.post('/update', function(request, response){
 		room.users[index].lon = lon;
 		room.users[index].progress = progress;
 		room.save(function(err) {if (err) throw err;});
+		res.json(room);
 	});
 });
 
