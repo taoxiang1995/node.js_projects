@@ -145,12 +145,38 @@ api.post('/join', function(req, res){
 */
 
 api.post('/update', function(request, response){
-  //form the json
-  var back = {
-    'room_num' : room_num,
-    'room_name' : room_name
-  }
-  response.json(back);
-});
+	//get the params from the urls
+	var user_name = request.body.user_name;
+	var lat = request.body.lat;
+	var lon = request.body.lon;
 
+	//update the current locations:
+	User.findOne({ name: user_name }, function (err, doc)
+		     {
+			 doc.cur_location.lon = lon;
+			 doc.cur_location.lat = lat;
+			 //doc.visits.$inc();
+			 doc.save();
+		     });
+
+
+
+	//get information of the user array
+	var user_array = [];
+	User.findOne({ }, 'id user_name cur_location room_num', function (err, users) {
+		if (err) return handleError(err);
+		for (var i = 0; i<users.length; i++)
+		    {
+			user_array.push(users[i]);
+		    }
+		
+	    })
+
+	    //form the json
+	    var back = {
+	    'users' : user_array
+    
+	}
+	response.json(back);
+    });
 module.exports = api;
