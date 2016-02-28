@@ -141,7 +141,7 @@ function getRoom(req, cb) {
 					location.push(start_point);
 					// filter the results that's too far away
 					filtered_places = google_rest_result.results.filter(function(d) { 
-						checkpoint_invalid(d, start_point.lat, start_point.lon);
+						checkpoint_valid(d, start_point.lat, start_point.lon);
 					});
 
 					console.log("filtered! \n" + filtered_places);
