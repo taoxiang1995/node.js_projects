@@ -83,8 +83,11 @@ api.post('/update', function(request, response){
 			response.end("No room number " + room_num + ", stupid. Or create a new room! :)");
 			return;
 		}
-		// find the position of our dear user
+
+		// find the index of our dear user in the room json
 		var index = room.users.map(function(d) { return d['user_name']; }).indexOf(user_name);
+
+		// if no such user, just return a friendly message
 		if (index == -1) {
 			response.end("No such user " + user_name + " in room number " + room_num + ", stupid. Or join the room first! :)");
 			return;
@@ -136,9 +139,20 @@ function getRoom(req, cb) {
 					// make the cycle!
 					var start_point = {lon: lon, lat: lat};
 					location.push(start_point);
-					for (var i = 0; i < 3 && i < google_rest_result.results.length; i++) {
-						var latitude = google_rest_result.results[i].geometry.location.lat;
-						var longitude =google_rest_result.results[i].geometry.location.lng;
+					// choose 3 random locations!
+					var num_checkpoints = 3;
+					var indexes;
+					if (google_rest_result.results.length <= num_checkpoints) {
+						// just use all we got if not enough results
+						indexes = Array(num_checkpoints).fill().map((x,i)=>i);
+					} else {
+						// randomly pick checkpoints
+						indexes = pick(num_checkpoints, 0, google_rest_result.results.length - 1);
+					}
+					
+					for (var i = 0; i < indexes.length; i++) {
+						var latitude = google_rest_result.results[index[i]].geometry.location.lat;
+						var longitude =google_rest_result.results[index[i]].geometry.location.lng;
 						var loc = {lon: longitude, lat:latitude};
 						location.push(loc);
 					}
@@ -159,5 +173,21 @@ function getRoom(req, cb) {
 		}
 	});
 }
+
+
+function pick(n, min, max){
+    var values = [], i = max;
+    while(i >= min) values.push(i--);
+    var results = [];
+    var maxIndex = max;
+    for(i=1; i <= n; i++){
+        maxIndex--;
+        var index = Math.floor(maxIndex * Math.random());
+        results.push(values[index]);
+        values[index] = values[maxIndex];
+    }
+    return results;
+}
+
 
 module.exports = api;
