@@ -140,7 +140,9 @@ function getRoom(req, cb) {
 					var start_point = {lon: lon, lat: lat};
 					location.push(start_point);
 					// filter the results that's too far away
-					filtered_places = google_rest_result.results.filter(checkpoint_invalid(start_point.lat, start_point.lat));
+					filtered_places = google_rest_result.results.filter(function(d) { 
+						checkpoint_invalid(d, start_point.lat, start_point.lon);
+					});
 
 					// choose 3 random locations!
 					var num_checkpoints = 3;
@@ -192,7 +194,7 @@ function pick(n, min, max){
     return results;
 }
 
-function checkpoint_invalid (element, index, array, cp_lat, cp_lon) {
+function checkpoint_invalid (element, cp_lat, cp_lon) {
 	// 5km is too far away
 	return (getDistanceFromLatLonInKm(element.lat, element.lon, cp_lat, cp_lon) > 5);
 }
