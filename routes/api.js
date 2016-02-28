@@ -139,20 +139,23 @@ function getRoom(req, cb) {
 					// make the cycle!
 					var start_point = {lon: lon, lat: lat};
 					location.push(start_point);
+					// filter the results that's too far away
+					filtered_places = google_rest_result.results.filter(!checkpoint_validate(start_point.lat, start_point.lat));
+
 					// choose 3 random locations!
 					var num_checkpoints = 3;
 					var indexes;
-					if (google_rest_result.results.length <= num_checkpoints) {
+					if (filtered_places.length <= num_checkpoints) {
 						// just use all we got if not enough results
 						indexes = Array(num_checkpoints).fill().map((x,i)=>i);
 					} else {
 						// randomly pick checkpoints
-						indexes = pick(num_checkpoints, 0, google_rest_result.results.length - 1);
+						indexes = pick(num_checkpoints, 0, filtered_places.length - 1);
 					}
 					
 					for (var i = 0; i < indexes.length; i++) {
-						var latitude = google_rest_result.results[indexes[i]].geometry.location.lat;
-						var longitude =google_rest_result.results[indexes[i]].geometry.location.lng;
+						var latitude = filtered_places[indexes[i]].geometry.location.lat;
+						var longitude = filtered_places[indexes[i]].geometry.location.lng;
 						var loc = {lon: longitude, lat:latitude};
 						location.push(loc);
 					}
@@ -189,5 +192,27 @@ function pick(n, min, max){
     return results;
 }
 
+function checkpoint_validate (element, index, array, cur_lat, cur_lon) {
+	// 5km is too far away
+	return (getDistanceFromLatLonInKm(element.lat, elemnt.lon, cp_lat, cp_lon) < 5);
+}
+
+function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
+  var R = 6371; // Radius of the earth in km
+  var dLat = deg2rad(lat2-lat1);  // deg2rad below
+  var dLon = deg2rad(lon2-lon1); 
+  var a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2)
+    ; 
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+  var d = R * c; // Distance in km
+  return d;
+}
+
+function deg2rad(deg) {
+  return deg * (Math.PI/180)
+}
 
 module.exports = api;
