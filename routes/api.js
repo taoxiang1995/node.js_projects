@@ -134,13 +134,14 @@ function getRoom(req, cb) {
 			        //console.log("got google response");
 					var google_rest_result = JSON.parse(body);
 					//build the array for nearby 5 locations
-					console.log('       ' + google_rest_result);
+					console.log('    lol   ' + google_rest_result);
 
 					// make the cycle!
 					var start_point = {lon: lon, lat: lat};
 					location.push(start_point);
 					// filter the results that's too far away
-					filtered_places = google_rest_result.results.filter(function(d) { 
+					filtered_places = google_rest_result.results;
+					filtered_places.filter(function(d) { 
 						checkpoint_valid(d, start_point.lat, start_point.lon);
 					});
 
