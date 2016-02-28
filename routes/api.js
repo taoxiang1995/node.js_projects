@@ -151,8 +151,8 @@ function getRoom(req, cb) {
 					}
 					
 					for (var i = 0; i < indexes.length; i++) {
-						var latitude = google_rest_result.results[index[i]].geometry.location.lat;
-						var longitude =google_rest_result.results[index[i]].geometry.location.lng;
+						var latitude = google_rest_result.results[indexes[i]].geometry.location.lat;
+						var longitude =google_rest_result.results[indexes[i]].geometry.location.lng;
 						var loc = {lon: longitude, lat:latitude};
 						location.push(loc);
 					}
