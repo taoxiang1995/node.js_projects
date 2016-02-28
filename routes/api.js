@@ -192,7 +192,7 @@ function pick(n, min, max){
     return results;
 }
 
-function checkpoint_validate (element, index, array, cur_lat, cur_lon) {
+function checkpoint_validate (element, index, array, cp_lat, cp_lon) {
 	// 5km is too far away
 	return (getDistanceFromLatLonInKm(element.lat, element.lon, cp_lat, cp_lon) < 5);
 }
