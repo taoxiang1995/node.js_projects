@@ -143,7 +143,8 @@ function getRoom(req, cb) {
 					filtered_places = google_rest_result.results.filter(function(d) { 
 						checkpoint_invalid(d, start_point.lat, start_point.lon);
 					});
-
+					
+					console.log("filtered! \n" + filtered_places);
 					// choose 3 random locations!
 					var num_checkpoints = 3;
 					var indexes;
