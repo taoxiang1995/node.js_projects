@@ -143,7 +143,7 @@ function getRoom(req, cb) {
 					filtered_places = google_rest_result.results.filter(function(d) { 
 						checkpoint_invalid(d, start_point.lat, start_point.lon);
 					});
-					
+
 					console.log("filtered! \n" + filtered_places);
 					// choose 3 random locations!
 					var num_checkpoints = 3;
@@ -195,9 +195,9 @@ function pick(n, min, max){
     return results;
 }
 
-function checkpoint_invalid (element, cp_lat, cp_lon) {
+function checkpoint_valid (element, cp_lat, cp_lon) {
 	// 5km is too far away
-	return (getDistanceFromLatLonInKm(element.lat, element.lon, cp_lat, cp_lon) > 5);
+	return (getDistanceFromLatLonInKm(element.lat, element.lon, cp_lat, cp_lon) < 5);
 }
 
 function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
