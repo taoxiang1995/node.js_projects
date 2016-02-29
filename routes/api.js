@@ -32,8 +32,6 @@ db.once('open', function(){
   //   });
 });
 
-
-
 // mongoose.connect('mongodb://localhost:27017/users');
 
 
@@ -134,18 +132,16 @@ function getRoom(req, cb) {
 			        //console.log("got google response");
 					var google_rest_result = JSON.parse(body);
 					//build the array for nearby 5 locations
-					console.log('    lol   ' + google_rest_result);
-
 					// make the cycle!
 					var start_point = {lon: lon, lat: lat};
 					location.push(start_point);
 					// filter the results that's too far away
 					filtered_places = google_rest_result.results;
 					filtered_places.filter(function(d) { 
-						checkpoint_valid(d, start_point.lat, start_point.lon);
+						checkpoint_valid(d.geometry.location, start_point.lat, start_point.lon);
 					});
 
-					console.log("filtered! \n" + filtered_places);
+					// console.log("filtered! \n" + JSON.stringify(filtered_places));
 					// choose 3 random locations!
 					var num_checkpoints = 3;
 					var indexes;
@@ -198,7 +194,7 @@ function pick(n, min, max){
 
 function checkpoint_valid (element, cp_lat, cp_lon) {
 	// 5km is too far away
-	return (getDistanceFromLatLonInKm(element.lat, element.lon, cp_lat, cp_lon) < 5);
+	return (getDistanceFromLatLonInKm(element.lat, element.lng, cp_lat, cp_lon) < 5);
 }
 
 function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
