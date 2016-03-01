@@ -123,7 +123,7 @@ function getRoom(req, cb) {
 			// send google place request
 			var lon = req.body.lon;
 			var lat = req.body.lat;
-			var rest_api = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?key=AIzaSyA9oGIO45zHzrEwc-XuTZAT2-ltcPpDyk0&radius=500&location='+lat+','+lon;
+			var rest_api = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?key=AIzaSyA9oGIO45zHzrEwc-XuTZAT2-ltcPpDyk0&radius=800&location='+lat+','+lon;
 			var location = [];
 
   			request.get(rest_api, function (error, response, body) {
@@ -152,6 +152,7 @@ function getRoom(req, cb) {
 					} else {
 						// randomly pick checkpoints
 						indexes = pick(num_checkpoints, 0, filtered_places.length - 1);
+						console.log(JSON.stringify(indexes));
 					}
 					
 					for (var i = 0; i < indexes.length; i++) {
