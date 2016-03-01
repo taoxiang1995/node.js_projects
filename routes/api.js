@@ -131,17 +131,18 @@ function getRoom(req, cb) {
 			        //console.log(body); // Show the HTML for the Modulus homepage.
 			        //console.log("got google response");
 					var google_rest_result = JSON.parse(body);
+
 					//build the array for nearby 5 locations
 					// make the cycle!
 					var start_point = {lon: lon, lat: lat};
 					location.push(start_point);
 					// filter the results that's too far away
-					filtered_places = google_rest_result.results;
-					filtered_places.filter(function(d) { 
-						checkpoint_valid(d.geometry.location, start_point.lat, start_point.lon);
+					var filtered_places = google_rest_result.results.filter(function(d) { 
+						return checkpoint_valid(start_point.lat, start_point.lon, d.geometry.location.lat, d.geometry.location.lng);
 					});
 
-					// console.log("filtered! \n" + JSON.stringify(filtered_places));
+					// console.log(filtered_places.length + '/' + google_rest_result.results.length);
+
 					// choose 3 random locations!
 					var num_checkpoints = 3;
 					var indexes;
@@ -192,9 +193,11 @@ function pick(n, min, max){
     return results;
 }
 
-function checkpoint_valid (element, cp_lat, cp_lon) {
+function checkpoint_valid (current_lat, current_lng, cp_lat, cp_lng) {
 	// 5km is too far away
-	return (getDistanceFromLatLonInKm(element.lat, element.lng, cp_lat, cp_lon) < 5);
+	var a = getDistanceFromLatLonInKm(current_lat, current_lng, cp_lat, cp_lng);
+	// console.log(a+'km');
+	return (a < 5);
 }
 
 function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
