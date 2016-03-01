@@ -141,7 +141,7 @@ function getRoom(req, cb) {
 						return checkpoint_valid(start_point.lat, start_point.lon, d.geometry.location.lat, d.geometry.location.lng);
 					});
 
-					// console.log(filtered_places.length + '/' + google_rest_result.results.length);
+					console.log('# of valid checkpoints' + filtered_places.length + '/' + google_rest_result.results.length);
 
 					// choose 3 random locations!
 					var num_checkpoints = 3;
