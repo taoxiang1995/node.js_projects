@@ -105,7 +105,9 @@ api.post('/update', function(request, response){
 // Helper function to get a room according to room number
 function getRoom(req, cb) {
 
-	var key_word = req.body.key_word;
+	//var key_word = req.body.key_word;
+	var key_word = req.headers.key_word;
+	//var key_word = 'LA';
 	console.log(key_word);
 	
 
