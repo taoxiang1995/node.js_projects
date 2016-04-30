@@ -5,6 +5,7 @@ var request = require('request');
 // if our user.js file is at app/models/user.js
 var User = require('../db_user');
 var Room = require('../db_room');
+var Twitter = require('twitter');
   
 var mongoose = require('mongoose');
 var mongo_uri = process.env.MONGOLAB_URI;
@@ -35,36 +36,30 @@ db.once('open', function(){
 // mongoose.connect('mongodb://localhost:27017/users');
 
 
+
 /*
 *  input: http://localhost3000/join room_num lon lat user_name
 	back: a json package, contains room_num, user_name, five check points locations
 	*/
-api.post('/join', function(req, res) {
+api.post('/adwords', function(req, res) {
+	
 	// first, check if the room exists
   	getRoom(req, function(roomResult) {
-    	var user_name = req.body.user_name;
-    	var found = false;
-    	// check if the user already joined
-		for (var i = 0; i < roomResult.users.length; i++) {
-			if (roomResult.users[i].user_name == user_name) {
-				found = true;
-			}
-		}
-		// if the user haven't joined yet, add the user into room and save room
-		if (!found){
-			var chris = new User({
-				user_name: req.body.user_name,
-				lat: req.body.lat,
-				lon: req.body.lon,
-				progress: -1,
-				check_time: -1
-			});
-			roomResult.users.push(chris);
-			roomResult.save(function(err) {if (err) throw err;});
-		}
+    	
     	res.json(roomResult);
 	});
 });
+
+
+api.post('/locations', function(req, res) {
+	
+	// first, check if the room exists
+  	getLocation(req, function(result) {
+    	
+    	res.json(result);
+	});
+});
+
 
 api.post('/update', function(request, response){
 	// get the params from the urls
@@ -109,15 +104,78 @@ api.post('/update', function(request, response){
 
 // Helper function to get a room according to room number
 function getRoom(req, cb) {
+
+	var key_word = req.body.key_word;
+	console.log(key_word);
+	
+
+	var client = new Twitter({
+		  consumer_key: 'KsRUqkY9CZO1Y3rpJLEABgPKB',
+		  consumer_secret: 'PVxUcF3YNKxxSv5wsTE4kIOCwshJZSKSkAAfCVxj8OJlgVNNJN',
+		  access_token_key: '726422661841055745-KMgta1tZtaMDeYpAy8QoWEHpAMvmZQ4',
+		  access_token_secret: '0fjmsNnaRFobzhFi4Hs4fIuHwQAk6Z6adFs1wFLulRFgI'
+		});
+
+	var params = {screen_name: 'nodejs'};
+	client.get('search/tweets.json?q=%23'+key_word+'&result_type=recent', params, function(error, tweets, response){
+	  if (!error) {
+
+	    var final_result = [];
+
+	    var tweet_result=[];
+	    for (var i =0; i<tweets.statuses.length; i++)
+	    {
+	    	tweet_result[i] = tweets.statuses[i].text;
+	    }
+
+	    for (var i=0; i<tweet_result.length; i++)
+	    {
+	    	for (var b = 0; b<tweet_result[i].length; b++)
+	    	{
+	    		var hashtags="";
+		    	//tweet_result[i]
+		    	//console.log(tweet_result[i]);
+		    	if (tweet_result[i][b]=="#")
+		    	{
+		    		for (b=b; tweet_result[i][b]!=' '&&b<tweet_result[i].length; b++)
+		    		{
+		    			//console.log(tweet_result[i][b]);
+		    			hashtags = hashtags + tweet_result[i][b];
+		    			//hashtags = hashtags.concat(tweet_result[i][b]);
+		    		}
+		    		b--;
+		    		final_result.push(hashtags);
+		    	}
+	    	}
+	    	    	
+	    }
+
+    //final_result is the array contain all the hashtag
+    for (var i=0; i<final_result.length; i++)
+    {
+    	for (var b=i+1; b<final_result.length; b++)
+    	{
+    		if (final_result[i]==final_result[b])
+    		{
+    			final_result.splice(b, 1);
+    		}
+    	}
+    }
+
+    cb(final_result);
+  }
+});
+}
+
+
+// Helper function to get a room according to room number
+function getLocation (req, cb) {
 	// get room from DB, create a new one if not exist yet
 	var room_num = req.body.room_num;
 	Room.findOne({room_num: room_num}, function(err, room) {
 		if (err) throw err;
 		// if already exists, just return
-		if (room != null) {
-			cb(room);
-			console.log(room);
-		}
+		
 		// if dont exist yet, create a new room using the user's lon, lat
  		else {
 			// send google place request
@@ -132,91 +190,57 @@ function getRoom(req, cb) {
 			        //console.log("got google response");
 					var google_rest_result = JSON.parse(body);
 
-					//build the array for nearby 5 locations
-					// make the cycle!
-					var start_point = {lon: lon, lat: lat};
-					location.push(start_point);
-					// filter the results that's too far away
-					var filtered_places = google_rest_result.results.filter(function(d) { 
-						return checkpoint_valid(start_point.lat, start_point.lon, d.geometry.location.lat, d.geometry.location.lng);
-					});
+					// //build the array for nearby 5 locations
+					// // make the cycle!
+					// var start_point = {lon: lon, lat: lat};
+					// location.push(start_point);
+					// // filter the results that's too far away
+					// var filtered_places = google_rest_result.results.filter(function(d) { 
+					// 	return checkpoint_valid(start_point.lat, start_point.lon, d.geometry.location.lat, d.geometry.location.lng);
+					// });
 
-					console.log('# of valid checkpoints' + filtered_places.length + '/' + google_rest_result.results.length);
+					// console.log('# of valid checkpoints' + filtered_places.length + '/' + google_rest_result.results.length);
 
-					// choose 3 random locations!
-					var num_checkpoints = 3;
-					var indexes;
-					if (filtered_places.length <= num_checkpoints) {
-						// just use all we got if not enough results
-						indexes = Array(num_checkpoints).fill().map((x,i)=>i);
-					} else {
-						// randomly pick checkpoints
-						indexes = pick(num_checkpoints, 0, filtered_places.length - 1);
-						console.log(JSON.stringify(indexes));
-					}
+					// // choose 3 random locations!
+					// var num_checkpoints = 3;
+					// var indexes;
+					// if (filtered_places.length <= num_checkpoints) {
+					// 	// just use all we got if not enough results
+					// 	indexes = Array(num_checkpoints).fill().map((x,i)=>i);
+					// } else {
+					// 	// randomly pick checkpoints
+					// 	indexes = pick(num_checkpoints, 0, filtered_places.length - 1);
+					// 	console.log(JSON.stringify(indexes));
+					// }
 					
-					for (var i = 0; i < indexes.length; i++) {
-						var latitude = filtered_places[indexes[i]].geometry.location.lat;
-						var longitude = filtered_places[indexes[i]].geometry.location.lng;
-						var loc = {lon: longitude, lat:latitude};
-						location.push(loc);
+					// for (var i = 0; i < indexes.length; i++) {
+					// 	var latitude = filtered_places[indexes[i]].geometry.location.lat;
+					// 	var longitude = filtered_places[indexes[i]].geometry.location.lng;
+					// 	var loc = {lon: longitude, lat:latitude};
+					// 	location.push(loc);
+					// }
+					// location.push(start_point);
+
+					// var room_obj = new Room({
+					// 	room_num: room_num,
+					// 	locations: location
+					// });
+
+					// room_obj.save(function(err){
+					// 	if (err) throw err;
+					// });
+					// console.log('created new room:'+room_obj);
+					var final = [];
+					for (var i=0; i<google_rest_result.results.length; i++)
+					{
+						final.push(google_rest_result.results[i].name)
 					}
-					location.push(start_point);
-
-					var room_obj = new Room({
-						room_num: room_num,
-						locations: location
-					});
-
-					room_obj.save(function(err){
-						if (err) throw err;
-					});
-					console.log('created new room:'+room_obj);
-					cb(room_obj);
+					cb(final);
 				}
 			});
 		}
 	});
-}
 
-
-function pick(n, min, max){
-    var values = [], i = max;
-    while(i >= min) values.push(i--);
-    var results = [];
-    var maxIndex = max;
-    for(i=1; i <= n; i++){
-        maxIndex--;
-        var index = Math.floor(maxIndex * Math.random());
-        results.push(values[index]);
-        values[index] = values[maxIndex];
-    }
-    return results;
-}
-
-function checkpoint_valid (current_lat, current_lng, cp_lat, cp_lng) {
-	// 5km is too far away
-	var a = getDistanceFromLatLonInKm(current_lat, current_lng, cp_lat, cp_lng);
-	// console.log(a+'km');
-	return (a < 5);
-}
-
-function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
-  var R = 6371; // Radius of the earth in km
-  var dLat = deg2rad(lat2-lat1);  // deg2rad below
-  var dLon = deg2rad(lon2-lon1); 
-  var a = 
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
-    Math.sin(dLon/2) * Math.sin(dLon/2)
-    ; 
-  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-  var d = R * c; // Distance in km
-  return d;
-}
-
-function deg2rad(deg) {
-  return deg * (Math.PI/180)
 }
 
 module.exports = api;
