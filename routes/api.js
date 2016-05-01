@@ -146,6 +146,7 @@ function getRoom(req, cb) {
 		    			//hashtags = hashtags.concat(tweet_result[i][b]);
 		    		}
 		    		b--;
+		    		if (hashtags!="code" && hashtags!="promo"&&hashtags!="health"&&hashtags!="party"&&hashtags!="NBA"&&hashtags!="nba")
 		    		final_result.push(hashtags);
 		    	}
 	    	}
