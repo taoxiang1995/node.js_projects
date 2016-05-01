@@ -106,7 +106,7 @@ api.post('/update', function(request, response){
 function getRoom(req, cb) {
 
 	//var key_word = req.body.key_word;
-	var key_word = req.headers.key_word;
+	var key_word = req.body.key_word;
 	//var key_word = 'LA';
 	console.log(key_word);
 	
